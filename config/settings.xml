@@ -1,0 +1,25 @@
+<Settings>
+    <Appearance>
+        <Theme type="string" value="Default" />
+        <AdditionalCSS type="string" value="" />
+    </Appearance>
+    <Auth>
+        <Token type="string" value="" />
+    </Auth>
+    <Other>
+        <CentralAuthority type="string" value="https://ca.chattedrooms.com" description="Creative Assurance server" />
+        <LocalCensorship type="bool" value="False" description="Enable local censorship (via DistilBERT, but currently unavailable)" />
+        <AIType type="list" description="AI server to use (only works on Custom AI compatible C.AI bots)" value="CharacterAI (do not use custom model)" id="CAI">
+            <item id="OAICompat">OpenAI-Compatible</item>
+            <item id="ollama">Ollama</item>
+            <item id="Local">Local GGUF</item>
+            <item id="CAI">CharacterAI (do not use custom model)</item>
+        </AIType>
+        <GPTLoc requirement="AIType==OAICompat" type="string" value="https://api.openai.com" description="OpenAI-compatible server. Only in effect if you choose OpenAI-Compatible" />
+        <GPTKey requirement="AIType==OAICompat" type="string" value="sk-..." description="OpenAI-compatible server apikey. Only in effect if you choose OpenAI-Compatible" />
+        <GPTModel requirement="AIType==OAICompat" type="string" value="gpt-3.5-turbo" description="Model to use for OpenAI-compatible servers. Only in effect if you choose OpenAI-Compatible" />
+        <OllamaModel requirement="AIType==ollama" type="string" value="llama2" description="Model to use for Ollama servers. Only in effect if you choose Ollama." />
+        <LocalModel requirement="AIType==Local" type="string" value="TheBloke/Mistral-7B-Instruct-v0.2-GGUF" description="HuggingFace model to use for Local GGUF mode." />
+        <Label1 type="label" requirement="AIType==CAI" value="No additional options available for Character.AI backend." />
+    </Other>
+</Settings>
