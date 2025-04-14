@@ -1,0 +1,7 @@
+PyQt5
+aiohttp
+requests
+PyCharacterAI
+qasync
+defusedxml
+libanoncai

@@ -8,7 +8,7 @@ Characterinator is a passion-fueled, reverse-engineered PyQt5-based client for C
 - 🦾 Lets you search and browse bots anonymously
 - 🚫 No NSFW bypasses — but does allow local censorship via DistilBERT
 - 🎨 Fully themeable via QSS (you can even blind yourself if you want to)
-- 🧪 Powered by [PyCharacterAI](https://github.com/Xtr4F/PyCharacterAI) and some other libraries
+- 🧪 Powered by [PyCharacterAI](https://github.com/Xtr4F/PyCharacterAI) and some other libraries, including libanoncai.
 - 💾 Has a full local settings system via XML
 - 🔥 Fast, clean, and funny as hell
 
@@ -24,6 +24,24 @@ Characterinator is a passion-fueled, reverse-engineered PyQt5-based client for C
 - 🧠 Configurable models for custom AI mode (OpenAI-compatible, Ollama, Local GGUF)
 - 🗃️ XML-based settings that are both human-readable and machine-driven
 - 🦝 Fully modular. Reverse engineered. Kinda janky. But it works.
+
+---
+
+## Actually implemented features
+- Character.AI integration
+- Anonymous bot discovery
+- Themes
+- Local GGUF
+- XML settings
+
+## Planned or in development features
+- Non-token login
+- Anonymous temporary chats for CustomAI models
+- DistilBERT censorship
+- Libanoncai separation to its own repo
+
+There is an archived version of the app; mvp.py which is the Minimum Viable Product version. This is pre-alpha, and is quite bad.
+main.py is the actual app python file.
 
 ---
 

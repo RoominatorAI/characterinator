@@ -36,4 +36,4 @@ htmlcov/
 *.log
 
 # ... and to avoid my TOKEN being leaked..
-settings.xml
+config/settings.xml
