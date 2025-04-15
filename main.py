@@ -640,6 +640,8 @@ class CharacterAIApp(QMainWindow):
                 self.llamaerror = True
 
     async def loadLlamaAsync(self):
+        if Llama is None:
+          return
         self.llama = None
         self.llamaerror = False
         thread = threading.Thread(target=self.loadLlama)
