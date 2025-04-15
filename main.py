@@ -184,8 +184,8 @@ class CharacterAIApp(QMainWindow):
     async def init_main_ui_offload(self, guest):
         loading_label = QLabel("Loading GGUF model...")
         self.setCentralWidget(loading_label)
-
-        await self.loadLlamaAsync() # Reload Llama model if AI type is Local
+        # Reload Llama model if AI type is Local
+        await self.loadLlamaAsync()
 
         self.tabs = QTabWidget()
         self.tab1 = QWidget()
@@ -628,6 +628,10 @@ class CharacterAIApp(QMainWindow):
         search_button.clicked.connect(lambda: asyncio.create_task(perform_search()))
 
     def loadLlama(self):
+        if Llama is None:
+            self.llama = None
+            self.llamaerror = True
+            return
         root = self.ConfigRoot
         if root.find(".//Other/AIType").get("id") == "Local":
             try:
@@ -639,10 +643,13 @@ class CharacterAIApp(QMainWindow):
                 print(f"Failed to load local model: {e}")
                 self.llama = None
                 self.llamaerror = True
+        else:
+            self.llama = None
+            self.llamaerror = True
 
     async def loadLlamaAsync(self):
         if Llama is None:
-          return
+            return
         self.llama = None
         self.llamaerror = False
         thread = threading.Thread(target=self.loadLlama)
