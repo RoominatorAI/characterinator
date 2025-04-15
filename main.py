@@ -28,6 +28,7 @@ try:
     from llama_cpp import Llama
 except ImportError:
     print("Llama.cpp not installed, local mode will not work.")
+    Llama = None
 
 
 def getTextFromTurn(turn): # Gets a swipe's content (you can swipe to generate new reply if the bot is dumb like usual)
