@@ -33,12 +33,12 @@ Characterinator is a passion-fueled, reverse-engineered PyQt5-based client for C
 - Themes
 - Local GGUF
 - XML settings
+- Libanoncai separation to its own repo
 
 ## Planned or in development features
 - Non-token login
 - Anonymous temporary chats for CustomAI models
 - DistilBERT censorship
-- Libanoncai separation to its own repo
 
 There is an archived version of the app; mvp.py which is the Minimum Viable Product version. This is pre-alpha, and is quite bad.
 main.py is the actual app python file.
