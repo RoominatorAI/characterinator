@@ -199,7 +199,7 @@ class CharacterAIApp(QMainWindow):
         email_dialog.setLayout(layout)
         eee = ""
 
-        if email_dialog.exec_() == QDialog.Accepted:
+        if email_dialog.exec() == QDialog.Accepted:
             email = email_input.text()
             format = {
             "0": {
@@ -245,7 +245,7 @@ class CharacterAIApp(QMainWindow):
         ok_button.clicked.connect(login_link_dialog.accept)
         login_link_dialog.setLayout(layout)
         
-        if login_link_dialog.exec_() == QDialog.Accepted:
+        if login_link_dialog.exec() == QDialog.Accepted:
             login_link = login_link_input.text().strip()
             if not login_link.startswith("https://character.ai/"):
                 QMessageBox.critical(self, "Error", "Invalid login link. Please enter a valid link.")
