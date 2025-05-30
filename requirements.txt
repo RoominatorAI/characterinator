@@ -1,8 +1,8 @@
-PySide6
 aiohttp
-requests
-PyCharacterAI
-qasync
 defusedxml
 libanoncai
+PyCharacterAI
+PySide6
 pywebview
+qasync
+requests

@@ -36,6 +36,19 @@ def createPost(topic="gLj1MBqU6AgCuf4IwUE-5q4Vz-CKMP5be23HERh0Ekg", title="Test 
     response = pluginAPI.postWithAuthorization(url, data)
     return response["post"]["external_id"]
 
+def createComment(post_id, content):
+    url = "https://plus.character.ai/chat/comment/create/"
+    data = {
+        "post_external_id": post_id,
+        "text": content,
+        "parent_uuid": None,  # Set to None for top-level comments
+    }
+    response = pluginAPI.postWithAuthorization(url, data)
+    if response.get("success"):
+        return response["msg"]["id"]
+    else:
+        raise Exception(f"Failed to create comment. Status code: {response.status_code}, Response: {response.text}")
+
 class FeedViewer(QWidget):
     def __init__(self, parent=None,kurwaParent=None):
         super().__init__(parent)
@@ -70,6 +83,15 @@ class FeedViewer(QWidget):
         self.loadMoreButton.setToolTip("Load more posts from the feed. This will append to the current list. Works in anonymous mode, but you won't be able to create posts.")
         self.loadMoreButton.clicked.connect(lambda: self.loadFeed(append=True))
         self.layout.addWidget(self.loadMoreButton)
+        # Open ID button
+        self.openIDButton = QPushButton("Open Post by ID")
+        self.openIDButton.setObjectName("OpenIDButton")
+        self.openIDButton.setToolTip("Open a post by its ID.")
+        self.openIDButton.clicked.connect(lambda: self.create_dialogAsk(
+            lambda post_id, dialog: self.viewPostDetails(post_id, skipActionMenu=True),  # Callback to view post details
+            text="Enter Post ID (e.g. 1234567890)"  # Prompt text for the dialog
+        ))  # Skip the action menu to directly view the post details
+        self.layout.addWidget(self.openIDButton)
         # Feed list
         self.feedList = QListWidget()
         self.feedList.setObjectName("FeedList")
@@ -83,7 +105,17 @@ class FeedViewer(QWidget):
         self.feedJSON = None
         self.loadFeed()
         self.kurwaParent = kurwaParent # This is a workaround to access the parent QStackedWidget from the plugin system
-
+    def create_dialogAsk(parent,callback,text="Enter ID"):
+        dialog = QDialog(parent)
+        dialog.setWindowTitle(text)
+        dialog_layout = QVBoxLayout(dialog)
+        comment_input = QTextEdit(dialog)
+        comment_input.setPlaceholderText(text)
+        dialog_layout.addWidget(comment_input)
+        submit_button = QPushButton("Submit", dialog)
+        dialog_layout.addWidget(submit_button)
+        submit_button.clicked.connect(lambda: callback(comment_input.toPlainText(), dialog))
+        dialog.exec_()
     def loadFeed(self, append=False):
         if not append:
             self.feedList.clear()
@@ -116,13 +148,16 @@ class FeedViewer(QWidget):
         if not post_id:
             return
         self.viewPostDetails(post_id)
-    def viewPostDetails(self, post_id):
+    def viewPostDetails(self, post_id,skipActionMenu=False):
         menu = QMenu(self)
         viewDetailsAction = menu.addAction("View Post Details")
         #openBrowserAction = menu.addAction("Open in Browser") # This doesnt work since it opens the API URL, not the post URL.
         # (the original frontend was shut down, so the post URL is not available anymore. this is a replacement frontend that uses the API to get the post details)
-        action = menu.exec_(QCursor.pos())
+        if not skipActionMenu:
 
+            action = menu.exec_(QCursor.pos())
+        else:
+            action = viewDetailsAction
         if action == viewDetailsAction:
             try:
                 url = f"https://plus.character.ai/chat/post/?post={post_id}"
@@ -177,7 +212,31 @@ class FeedViewer(QWidget):
             postTextLabel.setStyleSheet("font-size: 14px; margin-bottom: 12px;")
             contentLayout.addWidget(postTextLabel)
 
+            def create_comment_dialog():
+                dialog = QDialog(detailsWidget)
+                dialog.setWindowTitle("Add Comment")
+                dialog_layout = QVBoxLayout(dialog)
+                comment_input = QTextEdit(dialog)
+                comment_input.setPlaceholderText("Enter your comment")
+                dialog_layout.addWidget(comment_input)
+                submit_button = QPushButton("Submit", dialog)
+                dialog_layout.addWidget(submit_button)
+                submit_button.clicked.connect(lambda: submit_comment(post_id, comment_input.toPlainText(), dialog))
+                dialog.exec_()
 
+            def submit_comment(post_id, text, dialog):
+                try:
+                    comment_id = createComment(post_id, text)
+                    QMessageBox.information(detailsWidget, "Success", f"Comment created with ID: {comment_id}")
+                    # Reload post details to update the comment list
+                    self.viewPostDetails(post_id,skipActionMenu=True)
+                except Exception as e:
+                    QMessageBox.critical(detailsWidget, "Error", str(e))
+                dialog.close()
+
+            comment_button = QPushButton("Add Comment")
+            contentLayout.addWidget(comment_button)
+            comment_button.clicked.connect(lambda: create_comment_dialog())
 
             # Create a section for comments
             commentsLabel = QLabel("<b>Comments: (these fully work unlike actual post data)</b>")
@@ -285,7 +344,7 @@ class FeedViewer(QWidget):
         createButton.clicked.connect(lambda: 
                                         self.viewPostDetails(
                                             createPost(title=titleInput.text(), content=contentInput.toPlainText(),topic="puUoF8HHLL8QrsaGaZQ-hXz-pmsSffRxtEDGUZz5iAE")
-                                            )
+                                            ,skipActionMenu=True)  # Skip the action menu to directly view the post details
                                     )
         dialogLayout.addWidget(createButton)
 
