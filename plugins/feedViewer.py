@@ -64,6 +64,12 @@ class FeedViewer(QWidget):
         if pluginAPI.is_anonymous():
             self.createPostButton.setToolTip("You must be logged in to create a post.")
         self.layout.addWidget(self.createPostButton)
+        # Load more button
+        self.loadMoreButton = QPushButton("Load More Posts")
+        self.loadMoreButton.setObjectName("LoadMoreButton")
+        self.loadMoreButton.setToolTip("Load more posts from the feed. This will append to the current list. Works in anonymous mode, but you won't be able to create posts.")
+        self.loadMoreButton.clicked.connect(lambda: self.loadFeed(append=True))
+        self.layout.addWidget(self.loadMoreButton)
         # Feed list
         self.feedList = QListWidget()
         self.feedList.setObjectName("FeedList")
@@ -71,11 +77,11 @@ class FeedViewer(QWidget):
         self.layout.addWidget(self.feedList)
         # Initialize current page and connect signals
         self.page = 1
-        self.feedList.verticalScrollBar().valueChanged.connect(self.checkScroll)
+        #self.feedList.verticalScrollBar().valueChanged.connect(self.checkScroll)
         self.feedList.itemClicked.connect(self.onItemClicked)
 
-        self.loadFeed()
         self.feedJSON = None
+        self.loadFeed()
         self.kurwaParent = kurwaParent # This is a workaround to access the parent QStackedWidget from the plugin system
 
     def loadFeed(self, append=False):
@@ -83,8 +89,10 @@ class FeedViewer(QWidget):
             self.feedList.clear()
             self.page = 1
             self.feedJSON = []
+        else:
+            self.page += 1
         try:
-            response = requests.get(getFeedURL(page=self.page))
+            response = requests.get(getFeedURL(page=self.page,topic="puUoF8HHLL8QrsaGaZQ-hXz-pmsSffRxtEDGUZz5iAE",sort="created"))
             response.raise_for_status()  # Raise an error for bad responses
             data = response.json()
             for post in data.get('posts', []):
@@ -101,11 +109,6 @@ class FeedViewer(QWidget):
         except requests.RequestException as e:
             QMessageBox.critical(self, "Error", f"Failed to load feed: {e}")
 
-    def checkScroll(self, value):
-        # If we've reached the bottom, load the next page
-        if value == self.feedList.verticalScrollBar().maximum():
-            self.page += 1
-            self.loadFeed(append=True)
 
     def onItemClicked(self, item):
         post_data = item.data(Qt.UserRole)
@@ -158,13 +161,23 @@ class FeedViewer(QWidget):
             scrollArea.setWidget(contentWidget)
             contentLayout = QVBoxLayout(contentWidget)
 
-            # Display post details (except comments)
-            for key, value in post_details.items():
-                if key == "comments":
-                    continue
-                label = QLabel(f"<b>{key}:</b> {value}")
-                label.setTextInteractionFlags(Qt.TextSelectableByMouse)
-                contentLayout.addWidget(label)
+            # Title + username (styled as H1)
+            title = post_details.get("title", "Untitled")
+            poster_username = post_details.get("poster_name", "unknown")
+            headerLabel = QLabel(f"<h1>{title}</h1><p><b>by @{poster_username}</b></p>")
+            headerLabel.setTextInteractionFlags(Qt.TextSelectableByMouse)
+            headerLabel.setWordWrap(True)
+            contentLayout.addWidget(headerLabel)
+
+            # Post text (with word wrap, scroll-safe)
+            post_text = post_details.get("text", "[No content]")
+            postTextLabel = QLabel(post_text)
+            postTextLabel.setWordWrap(True)
+            postTextLabel.setTextInteractionFlags(Qt.TextSelectableByMouse)
+            postTextLabel.setStyleSheet("font-size: 14px; margin-bottom: 12px;")
+            contentLayout.addWidget(postTextLabel)
+
+
 
             # Create a section for comments
             commentsLabel = QLabel("<b>Comments: (these fully work unlike actual post data)</b>")
@@ -183,7 +196,7 @@ class FeedViewer(QWidget):
 
                 # Load the avatar
                 avatar_file = comment.get("src__user__account__avatar_file_name", "")
-                avatar_url = "https://characterai.io/i/80/static/avatars/" + avatar_file
+                avatar_url = "https://characterai.io/i/80/static/avatars/" + str(avatar_file)
                 avatarLabel = QLabel()
                 try:
                     avatar_response = requests.get(avatar_url)
