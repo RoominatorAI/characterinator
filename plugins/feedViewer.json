@@ -1,0 +1,5 @@
+{
+    "doNotUseThread": true,
+    "shouldArchivePosts": true,
+    "name": "Feed Viewer"
+}

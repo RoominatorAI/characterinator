@@ -5,3 +5,4 @@ PyCharacterAI
 qasync
 defusedxml
 libanoncai
+pywebview

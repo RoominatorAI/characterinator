@@ -32,8 +32,9 @@ import json
 from urllib.parse import quote
 import webview
 import libanoncai
+from PluginAPI import pluginmanager
 try:
-    from llama_cpp import Llama
+    from llama_cpp import Llama # type: ignore
 except ImportError:
     print("Llama.cpp not installed, local mode will not work.")
     Llama = None
@@ -104,6 +105,7 @@ class CharacterAIApp(QMainWindow):
         self.client = Client()
         self.libanon = libanoncai.AsyncClient()
         self.init_login_ui()
+        self.pluginMan = pluginmanager(self) # Initialize plugin manager. Which will abstract PySide6 API calls to plugins.
 
     def LoadTheme(self,themeselected):
         if themeselected == "Default":
@@ -326,6 +328,8 @@ class CharacterAIApp(QMainWindow):
         await self.loadLlamaAsync()
 
         self.tabs = QTabWidget()
+
+
         self.tab1 = QWidget()
         self.tab2 = QWidget()
 
@@ -347,6 +351,7 @@ class CharacterAIApp(QMainWindow):
             asyncio.create_task(self.init_chats_tab())
         asyncio.create_task(self.init_search_tab())
         asyncio.create_task(self.init_settings_tab())
+        self.pluginMan.load_plugins() # Load plugins
     
     async def createchat_and_chat_with(self,character_id):
         # Create a new chat with the character
@@ -1102,6 +1107,8 @@ class CharacterAIApp(QMainWindow):
             # Save token to config
             token_elem = self.ConfigRoot.find(".//Auth/Token")
             token_elem.set("value", token)
+            self.authToken = token
+            print("Authenticated successfully with token:", token)
             ElementTree(self.ConfigRoot).write("config/settings.xml")
             self.init_main_ui(False)
         except Exception as e:
@@ -1112,6 +1119,8 @@ class CharacterAIApp(QMainWindow):
             await self.client.authenticate(token)
             token_elem = self.ConfigRoot.find(".//Auth/Token")
             token_elem.set("value", token)
+            self.authToken = token
+            print("Authenticated successfully with token:", token)
             ElementTree(self.ConfigRoot).write("config/settings.xml")
             self.init_main_ui(False)
         except Exception as e:

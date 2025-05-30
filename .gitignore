@@ -37,3 +37,6 @@ htmlcov/
 
 # ... and to avoid my TOKEN being leaked..
 config/settings.xml
+
+# Avoid the archive being included in the package
+feedViewerArchive/
