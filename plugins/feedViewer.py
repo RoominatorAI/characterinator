@@ -191,6 +191,9 @@ class FeedViewer(QWidget):
             # Add a scroll area for the content
             scrollArea = QScrollArea()
             scrollArea.setWidgetResizable(True)
+            # Add refresh button to reload the post details
+            refreshButton = QPushButton("Refresh Post Details")
+            refreshButton.clicked.connect(lambda: self.viewPostDetails(post_id, skipActionMenu=True))
             detailsLayout.addWidget(scrollArea)
             contentWidget = QWidget()
             scrollArea.setWidget(contentWidget)
